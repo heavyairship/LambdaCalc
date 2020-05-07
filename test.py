@@ -1,4 +1,5 @@
-import argparse, sys
+import sys
+from optparse import OptionParser
 from lambda_calc import *
 
 def testReduction():
@@ -36,14 +37,20 @@ def testReduction():
     assert str(App(App(Var("M"), Var("N")), Abs("x", Var("x"))).red()) == "((M N) (Lx.x))"
     assert str(App(App(Var("M"), Var("N")), App(Var("A"), Var("B"))).red()) =="((M N) (A B))"
 
+    print("Unit tests for reductions passed!")
+
 def main():
+    print("Running unit tests...")
     testReduction()
-    parser = argparse.ArgumentParser()
-    parser.add_argument("file", help="path to lambda calc file", type=str)
-    args = parser.parse_args()
-    with open(args.file) as f:
-        expr = parse(f.read())
-        print(expr.red())
+
+    parser = OptionParser()
+    parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
+    (options, args) = parser.parse_args()
+    if options.filename:
+        print("Running test file...")
+        with open(options.filename) as f:
+            expr = parse(f.read())
+            print(expr.red())
 
 if __name__ == "__main__":
     main()
