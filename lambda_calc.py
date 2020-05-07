@@ -83,9 +83,64 @@ class App(LambdaExpr):
         return "(%s %s)" % (str(self.first), str(self.second))
 
 ##########################################################################
+
+def whitespace(c):
+    return c in ['\t', '\r', '\n', ' ']
+
+def tokenize(data):
+    tokens = []
+    var = ''
+    for idx, c in enumerate(data):
+        c = data[idx]
+        if whitespace(c):
+            if var != '':
+                tokens.append(var)
+                var = ''
+        elif c in ['(', ')', '.', 'L']:
+            if var != '':
+                tokens.append(var)
+                var = ''
+            tokens.append(c)
+        elif ('A' <= c and c <= 'Z') or ('a' <= c and c <= 'z'):
+            var += c
+        else:
+            raise ValueError("Illegal variable character: %s" % c) 
+    if var != '':
+        tokens.append(var)
+        var = ''
+    return tokens
+
+def parseTerm(t):
+    return Var(t) if type(t) == str else t
+
+def parseExpr(tokens):
+    while tokens[0] == '(' and tokens[-1] == ')':
+        tokens = tokens[1:-1]
+    if len(tokens) == 1:
+        return parseTerm(tokens[0])
+    if len(tokens) == 4:
+        return Abs(tokens[1], parseTerm(tokens[3]))
+    if len(tokens) == 2:
+        return App(parseTerm(tokens[0]), parseTerm(tokens[1]))
+
 def parse(data):
-    # FixMe: implement!
-    return App(Abs("x", Var("x")), Abs("x", Var("x")))
+    tokens = tokenize(data)
+    if len(tokens) == 0:
+        raise ValueError("Empty expressions not allowed")
+    if len(tokens) == 1:
+        return Var(tokens[0])
+    stack = []
+    for t in tokens:
+        stack.append(t)
+        if t == ')':
+            exprTokens = []
+            while stack[-1] != '(':
+                exprTokens.insert(0, stack.pop(-1))
+            exprTokens.insert(0, stack.pop(-1))
+            stack.append(parseExpr(exprTokens))
+    if len(stack) != 1:
+        raise ValueError("Expected end of input but found more tokens")
+    return stack[0]
         
 counter = -1
 def fresh():
