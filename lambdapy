@@ -1,0 +1,26 @@
+#!/usr/bin/python3
+
+##########################################################################
+# Command-line interpreter for the Lambda Calculus
+
+from LambdaCalc import *
+import sys
+import signal 
+
+import curses
+
+while True:
+    try:
+        data = input("> ")
+    except EOFError:
+        sys.exit()
+    except KeyboardInterrupt:
+        sys.exit()
+
+    if data in ["quit", "quit()", "exit", "exit()"]:
+        sys.exit()
+
+    try:
+        print(parse(data).red())
+    except Exception as e:
+        print(e)

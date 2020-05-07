@@ -1,6 +1,6 @@
 import sys
 from optparse import OptionParser
-from lambda_calc import *
+from LambdaCalc import *
 
 def testReduction():
     # Simple formulas
