@@ -41,7 +41,7 @@ def testReductions():
     print("Unit tests for reductions passed!")
 
 print("Running reduction enit tests...")
-testReduction()
+testReductions()
 
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
