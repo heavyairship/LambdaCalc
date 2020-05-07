@@ -40,7 +40,7 @@ def testReduction():
     print("Unit tests for reductions passed!")
 
 def main():
-    print("Running unit tests...")
+    print("Running reduction enit tests...")
     testReduction()
 
     parser = OptionParser()
@@ -49,9 +49,12 @@ def main():
     if options.filename:
         print("Running test file...")
         with open(options.filename) as f:
-            expr = parse(f.read())
-            assert str(expr.red()) == "((M N) y)"
-            print("Test file passed!")
+            rawInput = f.read()
+            print("Raw input: %s" % rawInput[0:-1])
+            parsedExpr = parse(rawInput)
+            print("Parsed expression: %s" % parsedExpr)
+            redExpr = parsedExpr.red()
+            print("Reduced expression: %s" % redExpr)
 
 if __name__ == "__main__":
     main()
