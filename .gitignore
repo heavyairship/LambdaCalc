@@ -1,3 +1,5 @@
 *.swp
 *.pyc
 __pycache__
+lambda_calc_heavyairship.egg-info
+build
