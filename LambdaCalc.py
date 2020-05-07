@@ -171,7 +171,7 @@ def resetFresh():
 ##########################################################################
 # Church Encoding
 def encode(n):
-    if not isinstance(n,int):
+    if not isinstance(n, int):
         raise TypeError
     if n < 0:
         raise ValueError
