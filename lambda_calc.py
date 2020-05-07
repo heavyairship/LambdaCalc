@@ -1,5 +1,19 @@
 ##########################################################################
 # Parsing/reduction for the Lambda Calculus
+# 
+#
+# Syntax for valid Lambda terms:
+#
+# x      Variable: A character or string that represents an atomic value.
+#
+# (Lx.M) Abstraction: A function definition that binds the parameter 
+#        variable x in the body M, which is a Lambda term.
+#
+# (M N)  Application: Application of a function M to an argument N, both
+#        of which are lambda terms.
+#
+# Note that extra parentheses are allowed by the parser, but the 
+# parentheses around Abstractions and Applications are required.
 
 ##########################################################################
 # Abstract base class for a Lambda Calculus Expression
