@@ -118,10 +118,12 @@ def parseExpr(tokens):
         tokens = tokens[1:-1]
     if len(tokens) == 1:
         return parseTerm(tokens[0])
-    if len(tokens) == 4:
+    if len(tokens) == 4 and tokens[0] == 'L' and tokens[2] == '.':
         return Abs(tokens[1], parseTerm(tokens[3]))
     if len(tokens) == 2:
         return App(parseTerm(tokens[0]), parseTerm(tokens[1]))
+    else:
+        raise ValueError("Could not parse tokens: %s" % str(tokens))
 
 def parse(data):
     tokens = tokenize(data)
