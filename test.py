@@ -18,7 +18,6 @@ def testReduction():
     assert str(App(Abs("x", Var("x")), Abs("x", Var("x"))).red()) == "(Lx.x)"
     assert str(App(Abs("x", Var("x")), App(Var("M"), Var("N"))).red()) == "(M N)"
 
-
     # Application of abstraction with capture-avoiding substitution
     assert str(App(Abs("x", Var("M")), Var("x")).red()) == "M"
     assert str(App(Abs("x", Var("M")), Var("z")).red()) == "M"
