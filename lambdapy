@@ -7,6 +7,7 @@ from LambdaCalc import *
 import sys
 import signal 
 
+# FixMe: enable arrow movement/editing the current line in the CLI
 import curses
 
 while True:
