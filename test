@@ -5,6 +5,8 @@ from optparse import OptionParser
 from LambdaCalc import *
 
 def testReductions():
+    print("Running reduction unit tests...")
+
     # Simple formulas
     assert str(Var("x").red()) == "x"
     assert str(Abs("x", Var("M")).red()) == "(Lx.M)"
@@ -40,8 +42,39 @@ def testReductions():
 
     print("Unit tests for reductions passed!")
 
-print("Running reduction enit tests...")
+def testChurchEncoding():
+    print("Running Church encoding unit tests...")
+
+    # Test encoding
+    zero = "(Lf.(Lx.x))"
+    one = "(Lf.(Lx.(f x)))"
+    two = "(Lf.(Lx.(f (f x))))"
+    three = "(Lf.(Lx.(f (f (f x)))))"
+    assert str(encode(0)) == zero
+    assert str(encode(1)) == one
+    assert str(encode(2)) == two
+    assert str(encode(3)) == three
+
+    # Test decoding
+    assert decode(parse(zero)) == 0
+    assert decode(parse(one)) == 1
+    assert decode(parse(two)) == 2
+    assert decode(parse(three)) == 3
+
+    # Test inverse property for encode/decode
+    assert decode(encode(0)) == 0
+    assert decode(encode(1)) == 1
+    assert decode(encode(2)) == 2
+    assert decode(encode(3)) == 3
+    assert str(encode(decode(parse(zero)))) == zero
+    assert str(encode(decode(parse(one)))) == one
+    assert str(encode(decode(parse(two)))) == two
+    assert str(encode(decode(parse(three)))) == three
+
+    print("Unit tests for Church encodings passed!")
+
 testReductions()
+testChurchEncoding()
 
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)

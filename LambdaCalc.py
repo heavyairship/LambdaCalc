@@ -167,3 +167,34 @@ def fresh():
 def resetFresh():
     global counter
     counter = -1
+
+##########################################################################
+# Church Encoding
+
+def encode(n):
+    if not isinstance(n,int):
+        raise TypeError
+    if n < 0:
+        raise ValueError
+
+    def body(n):
+        return Var("x") if n == 0 else App(Var("f"), body(n-1))
+
+    return Abs("f", Abs("x", body(n)))
+
+def decode(l):
+    if not isinstance(l, LambdaExpr):
+        raise TypeError
+    if not l.body:
+        raise ValueError
+    if not l.body.body:
+        raise ValueError
+
+    def decodeBody(b):
+        if isinstance(b, Var):
+            return 0
+        if isinstance(b, App):
+            return 1 + decodeBody(b.second)
+        raise ValueError
+
+    return decodeBody(l.body.body)
