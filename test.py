@@ -1,8 +1,10 @@
+#!/usr/bin/python3
+
 import sys
 from optparse import OptionParser
 from LambdaCalc import *
 
-def testReduction():
+def testReductions():
     # Simple formulas
     assert str(Var("x").red()) == "x"
     assert str(Abs("x", Var("M")).red()) == "(Lx.M)"
@@ -38,22 +40,18 @@ def testReduction():
 
     print("Unit tests for reductions passed!")
 
-def main():
-    print("Running reduction enit tests...")
-    testReduction()
+print("Running reduction enit tests...")
+testReduction()
 
-    parser = OptionParser()
-    parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
-    (options, args) = parser.parse_args()
-    if options.filename:
-        print("Running test file...")
-        with open(options.filename) as f:
-            rawInput = f.read()
-            print("Raw input: %s" % rawInput[0:-1])
-            parsedExpr = parse(rawInput)
-            print("Parsed expression: %s" % parsedExpr)
-            redExpr = parsedExpr.red()
-            print("Reduced expression: %s" % redExpr)
-
-if __name__ == "__main__":
-    main()
+parser = OptionParser()
+parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
+(options, args) = parser.parse_args()
+if options.filename:
+    print("Running test file...")
+    with open(options.filename) as f:
+        rawInput = f.read()
+        print("Raw input: %s" % rawInput[0:-1])
+        parsedExpr = parse(rawInput)
+        print("Parsed expression: %s" % parsedExpr)
+        redExpr = parsedExpr.red()
+        print("Reduced expression: %s" % redExpr)
