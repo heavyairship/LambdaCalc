@@ -50,7 +50,8 @@ def main():
         print("Running test file...")
         with open(options.filename) as f:
             expr = parse(f.read())
-            print(expr.red())
+            assert str(expr.red()) == "((M N) y)"
+            print("Test file passed!")
 
 if __name__ == "__main__":
     main()
