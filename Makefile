@@ -4,7 +4,7 @@ install:
 	cp lambdapy /usr/local/bin/lambdapy
 
 check:
-	./test --file test.l
+	cd test && ./test --file test.l
 
 clean:
-	rm -rf *pyc __pycache__/
+	rm -rf *pyc __pycache__/ build/
