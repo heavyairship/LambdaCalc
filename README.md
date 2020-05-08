@@ -43,11 +43,22 @@ You can also use the LambdaCalc types to build an expression directly:
 
 ## Interpreter
 
-To run the interpreter:
+To run the interpreter as a REPL:
 ```
 $ lambdapy
 > ((Lx.x) y)
 y
+```
+
+To run the interpreter on a file (unlimited reducations by default):
+```
+$ lambdapy --file test.l
+((M N) y)
+```
+
+For more info run:
+```
+$ lambdapy --help
 ```
 
 ## Tests

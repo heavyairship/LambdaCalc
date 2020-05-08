@@ -1,15 +1,35 @@
 #!/usr/bin/python3
 
 ##########################################################################
-# Command-line interpreter for the Lambda Calculus
+# Interpreter for the Lambda Calculus
 
 from LambdaCalc import *
+from optparse import OptionParser
 import sys
-import signal 
 
+parser = OptionParser()
+parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
+parser.add_option("-l", "--limit", dest="limit", help="max number of reductions to apply", type=int)
+(options, args) = parser.parse_args()
+
+##########################################################################
+# File mode
+if options.filename:
+    with open(options.filename) as f:
+        expr = parse(f.read())
+        count = 0
+        while not expr.terminal():
+            if options.limit is not None and count >= options.limit:
+                sys.stderr.write("Error: reduction limit exceeded\n")
+                sys.exit(-1)
+            expr = expr.red()
+            count += 1
+        print(expr)
+        sys.exit()
+
+##########################################################################
+# REPL mode
 # FixMe: enable arrow movement/editing the current line in the CLI
-import curses
-
 while True:
     try:
         data = input("> ")
@@ -17,10 +37,8 @@ while True:
         sys.exit()
     except KeyboardInterrupt:
         sys.exit()
-
     if data in ["quit", "quit()", "exit", "exit()"]:
         sys.exit()
-
     try:
         print(parse(data).red())
     except Exception as e:
