@@ -20,11 +20,15 @@
 class LambdaExpr(object):
     def red(self):
         pass
+    def bigRed(self):
+        pass
     def app(self, argument):
         pass
     def sub(self, var, expr):
         pass
     def free(self):
+        pass
+    def terminal(self):
         pass
     def __str__(self):
         pass
@@ -36,6 +40,8 @@ class Var(LambdaExpr):
         self.var = var
     def red(self):
         return self
+    def bigRed(self):
+        return self
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -46,6 +52,8 @@ class Var(LambdaExpr):
         return self if self.var != var else expr
     def free(self):
         return set([self.var])
+    def terminal(self):
+        return True
     def __str__(self):
         return self.var
 
@@ -57,6 +65,8 @@ class Abs(LambdaExpr):
         self.body = body
     def red(self):
         return Abs(self.param, self.body.red())
+    def bigRed(self):
+        return Abs(self.param, self.body.bigRed())
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -72,6 +82,8 @@ class Abs(LambdaExpr):
         return Abs(self.param, self.body.sub(var, expr)) 
     def free(self):
         return self.body.free() - set([self.param])
+    def terminal(self):
+        return self.body.terminal()
     def __str__(self):
         return "(L%s.%s)" % (self.param, str(self.body))
 
@@ -83,6 +95,9 @@ class App(LambdaExpr):
         self.second = second
     def red(self):
         return self.first.red().app(self.second.red())
+    def bigRed(self):
+        out = self.first.bigRed().app(self.second.bigRed())
+        return out if out.terminal() else out.bigRed()
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -93,6 +108,8 @@ class App(LambdaExpr):
         return App(self.first.sub(var, expr), self.second.sub(var, expr))
     def free(self):
         return self.first.free().union(self.second.free())
+    def terminal(self):
+        return self.first.terminal() and self.second.terminal() and not isinstance(self.first, Abs)
     def __str__(self):
         return "(%s %s)" % (str(self.first), str(self.second))
 
@@ -197,3 +214,8 @@ def decode(l):
         raise ValueError
 
     return decodeBody(l.body.body)
+
+def succ(l):
+    if not isinstance(l, LambdaExpr):
+        raise TypeError
+    return App(parse("(Ln.(Lf.(Lx.(f ((n f) x)))))"), l).bigRed()

@@ -71,10 +71,28 @@ def testChurchEncoding():
     assert str(encode(decode(parse(two)))) == two
     assert str(encode(decode(parse(three)))) == three
 
+    # Test successor function
+    assert str(succ(parse(zero))) == one
+    assert str(succ(parse(one))) == two
+    assert str(succ(parse(two))) == three
     print("Unit tests for Church encodings passed!")
+
+def testInfiniteLoop():
+    print("Running infinite loop tests...")
+    infloop = parse("((Lx.(x x)) (Lx.(x x)))")
+    for i in range(10):
+        assert str(infloop) == str(infloop.red())
+        infloop = infloop.red()
+    try:
+        infloop.bigRed()
+        assert False
+    except RecursionError:
+        pass
+    print("Infinite loop tests passed!")
 
 testReductions()
 testChurchEncoding()
+testInfiniteLoop()
 
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
