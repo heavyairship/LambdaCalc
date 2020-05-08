@@ -1,10 +1,10 @@
 # Lambda Calculus in Python!
 
-# Overview 
+## Overview 
  
 This project provides a Python library and interpreter for parsing and reducing Lambda Calculus expressions.
 
-# Prerequisities
+## Prerequisities
 
 The project is designed for a MacOS/Linux environment.
 
@@ -12,14 +12,14 @@ Running tests or the interpreter requires python3 and pip3.
 
 Make sure you've set your `$PYTHONOPATH` to include where pip3 installs packages.
 
-# Installation
+## Installation
 
 To install the library and interpreter:
 ```
 $ make install
 ```
 
-# Library
+## Library
 
 Here's an example of importing the module, parsing an expression from a string, and reducing that expression:
 
@@ -41,7 +41,7 @@ You can also use the LambdaCalc types to build an expression directly:
 'y'
 ```
 
-# Interpreter
+## Interpreter
 
 To run the interpreter:
 ```
@@ -50,7 +50,7 @@ $ lambdapy
 y
 ```
 
-# Tests
+## Tests
 To run tests:
 ```
 $ make check
