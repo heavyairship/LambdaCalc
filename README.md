@@ -50,7 +50,7 @@ $ lambdapy
 y
 ```
 
-To run the interpreter on a file (unlimited reducations by default):
+To run the interpreter on a file (unlimited reductions by default):
 ```
 $ lambdapy --file test.l
 ((M N) y)
