@@ -127,7 +127,7 @@ def tokenize(data):
             if var != '':
                 tokens.append(var)
                 var = ''
-        elif c in ['(', ')', '.', 'L']:
+        elif c in ['let', '=', ';', '(', ')', '.', 'L']:
             if var != '':
                 tokens.append(var)
                 var = ''
@@ -135,45 +135,106 @@ def tokenize(data):
         elif ('A' <= c and c <= 'Z') or ('a' <= c and c <= 'z'):
             var += c
         else:
-            raise ValueError("Illegal variable character: %s" % c) 
+            raise ValueError("Illegal variable character `%s`" % c) 
     if var != '':
         tokens.append(var)
         var = ''
     return tokens
 
-def parseTerm(t):
-    return Var(t) if type(t) == str else t
+def parseTerm(t, bindings):
+    # FixMe: need better name for this. Or better, a way to avoid needing this.
+    if type(t) == str:
+        if t in bindings:
+            return bindings[t]
+        return Var(t) 
+    return t
 
-def parseExpr(tokens):
+def parseExpr(tokens, bindings):
     while tokens[0] == '(' and tokens[-1] == ')':
         tokens = tokens[1:-1]
     if len(tokens) == 1:
-        return parseTerm(tokens[0])
+        return parseTerm(tokens[0], bindings)
     if len(tokens) == 4 and tokens[0] == 'L' and tokens[2] == '.':
-        return Abs(tokens[1], parseTerm(tokens[3]))
+        return Abs(tokens[1], parseTerm(tokens[3], bindings))
     if len(tokens) == 2:
-        return App(parseTerm(tokens[0]), parseTerm(tokens[1]))
+        return App(parseTerm(tokens[0], bindings), parseTerm(tokens[1], bindings))
     else:
-        raise ValueError("Could not parse tokens: %s" % str(tokens))
+        raise ValueError("Could not parse tokens `%s`" % str(tokens))
 
-def parse(data):
-    tokens = tokenize(data)
+def alphanumeric(iden):
+    for c in iden:
+        if (c < 'a' or c > 'z') and (c < 'A' or c > 'Z') and (c < '1' and c > '9'):
+            return False
+    return True
+
+def getBindings(tokens):
+    idx = 0
+    bindings = {}
+
+    while idx < len(tokens):
+        t = tokens[idx]
+        if t == "let":
+            # Parse `let` keyword
+            idx += 1
+
+            # Parse identifier
+            iden = tokens[idx]
+            if not alphanumeric(iden):
+                raise ValueError("Identifier `%s` is not alphanumeric" % iden)
+            idx += 1
+
+            # Parse `=` assignment operator
+            assn = tokens[idx]
+            if not assn == "=":
+                raise ValueError("Expected assignment operator `=` not `%s`" % assn)
+            idx += 1
+
+            # Find beginning/end for expression 
+            begin = idx
+            while tokens[idx] != ";":
+                idx += 1
+            end = idx
+
+            # Parse expression and add to bindings
+            expr = parseTokens(tokens[begin:end], bindings)
+            bindings[iden] = expr
+
+            # Parse `;` terminator
+            idx += 1
+        else:
+            idx += 1
+
+    return bindings
+        
+def parseTokens(tokens, bindings):            
     if len(tokens) == 0:
         raise ValueError("Empty expressions not allowed")
     if len(tokens) == 1:
-        return Var(tokens[0])
+        return parseTerm(tokens[0], bindings)
     stack = []
-    for t in tokens:
-        stack.append(t)
-        if t == ')':
-            exprTokens = []
-            while stack[-1] != '(':
+    idx = 0
+    while idx < len(tokens):
+        t = tokens[idx]
+        if t == 'let':
+            while tokens[idx] != ';':
+                idx += 1
+        else:
+            stack.append(t)
+            if t == ')':
+                exprTokens = []
+                while stack[-1] != '(':
+                    exprTokens.insert(0, stack.pop(-1))
                 exprTokens.insert(0, stack.pop(-1))
-            exprTokens.insert(0, stack.pop(-1))
-            stack.append(parseExpr(exprTokens))
+                stack.append(parseExpr(exprTokens, bindings))
+        idx += 1
     if len(stack) != 1:
         raise ValueError("Expected end of input but found more tokens")
-    return stack[0]
+    return parseTerm(stack[0], bindings)
+             
+def parse(data):
+    tokens = tokenize(data)
+    bindings = getBindings(tokens)
+    return parseTokens(tokens, bindings)
         
 counter = -1
 def fresh():
