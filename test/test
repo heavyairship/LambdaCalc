@@ -94,7 +94,8 @@ parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
 (options, args) = parser.parse_args()
 if options.filename:
-    print("Running test file...")
+    print()
+    print("Running test file `%s`..." % options.filename)
     with open(options.filename) as f:
         rawInput = f.read()
         print("Raw input: %s" % rawInput[0:-1])
@@ -102,8 +103,12 @@ if options.filename:
         print("Parsed expression: %s" % parsedExpr)
         redExpr = parsedExpr.bigRed()
         print("Reduced expression: %s" % redExpr)
+    print("Done")
 else:
+    print()
+    print("Running unit tests...")
     testReductions()
     testChurchEncoding()
     testInfiniteLoop()
+    print("Done")
 
