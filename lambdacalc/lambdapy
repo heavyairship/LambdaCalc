@@ -3,7 +3,7 @@
 ##########################################################################
 # Interpreter for the Lambda Calculus
 
-from LambdaCalc import *
+from lambdacalc.LambdaCalc import *
 from optparse import OptionParser
 import sys
 

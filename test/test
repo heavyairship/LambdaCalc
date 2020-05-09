@@ -2,7 +2,7 @@
 
 import sys
 from optparse import OptionParser
-from LambdaCalc import *
+from lambdacalc.LambdaCalc import *
 
 def testReductions():
     print("Running reduction unit tests...")

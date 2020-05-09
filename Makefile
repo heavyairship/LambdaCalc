@@ -1,10 +1,13 @@
 install:
 	pip3 install . --user
-	rm -r lambda_calc.egg-info
-	cp lambdapy /usr/local/bin/lambdapy
+	cp lambdacalc/lambdapy /usr/local/bin/lambdapy
 
 check:
-	cd test && ./test && ./test --file test.l && ./test --file test-let.l && ./test --file arithmetic.l && ./test --file logic.l
+	cd test && ./test && ./test --file test.l && ./test --file test-let.l && ./test --file ../lambdacalc/stdlib/arithmetic.l && ./test --file ../lambdacalc/stdlib/logic.l
 
 clean:
-	rm -rf *pyc __pycache__/ build/
+	rm -rf *pyc __pycache__/ build/ dist/ lambda_calc.egg-info/
+
+upload:
+	python3 -m twine upload --repository testpypi dist/*
+

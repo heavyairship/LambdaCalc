@@ -25,14 +25,14 @@ Here's an example of importing the module, parsing an expression from a string, 
 
 ```
 $ python
->>> from LambdaCalc import *
+>>> from lambdacalc.LambdaCalc import *
 >>> expr = parse("((Lx.x) y)")
 >>> reduced = expr.red()
 >>> str(reduced)
 'y'
 ```
 
-You can also use the LambdaCalc types to build an expression directly:
+You can also build an expression directly:
 
 ```
 >>> expr = App(Abs("x", Var("x")), Var("y"))
