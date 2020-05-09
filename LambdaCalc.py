@@ -28,7 +28,7 @@ class LambdaExpr(object):
         pass
     def free(self):
         pass
-    def terminal(self):
+    def normal(self):
         pass
     def __str__(self):
         pass
@@ -52,7 +52,7 @@ class Var(LambdaExpr):
         return self if self.var != var else expr
     def free(self):
         return set([self.var])
-    def terminal(self):
+    def normal(self):
         return True
     def __str__(self):
         return self.var
@@ -82,8 +82,8 @@ class Abs(LambdaExpr):
         return Abs(self.param, self.body.sub(var, expr)) 
     def free(self):
         return self.body.free() - set([self.param])
-    def terminal(self):
-        return self.body.terminal()
+    def normal(self):
+        return self.body.normal()
     def __str__(self):
         return "(L%s.%s)" % (self.param, str(self.body))
 
@@ -97,7 +97,7 @@ class App(LambdaExpr):
         return self.first.red().app(self.second.red())
     def bigRed(self):
         out = self.first.bigRed().app(self.second.bigRed())
-        return out if out.terminal() else out.bigRed()
+        return out if out.normal() else out.bigRed()
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -108,8 +108,8 @@ class App(LambdaExpr):
         return App(self.first.sub(var, expr), self.second.sub(var, expr))
     def free(self):
         return self.first.free().union(self.second.free())
-    def terminal(self):
-        return self.first.terminal() and self.second.terminal() and not isinstance(self.first, Abs)
+    def normal(self):
+        return self.first.normal() and self.second.normal() and not isinstance(self.first, Abs)
     def __str__(self):
         return "(%s %s)" % (str(self.first), str(self.second))
 
@@ -132,7 +132,7 @@ def tokenize(data):
                 tokens.append(var)
                 var = ''
             tokens.append(c)
-        elif ('A' <= c and c <= 'Z') or ('a' <= c and c <= 'z'):
+        elif alphanumeric(c):
             var += c
         else:
             raise ValueError("Illegal variable character `%s`" % c) 
@@ -167,6 +167,15 @@ def alphanumeric(iden):
             return False
     return True
 
+def symbolic(iden):
+    for c in iden:
+        if c not in ['|', '&', '^', '!', '~', '*', '+', '/', '-', '%', '$', '@', '<', '>']:
+            return False
+    return True
+
+def validIden(iden):
+    return alphanumeric(iden) or symbolic(iden)
+
 def getBindings(tokens):
     idx = 0
     bindings = {}
@@ -179,8 +188,8 @@ def getBindings(tokens):
 
             # Parse identifier
             iden = tokens[idx]
-            if not alphanumeric(iden):
-                raise ValueError("Identifier `%s` is not alphanumeric" % iden)
+            if not validIden(iden):
+                raise ValueError("Identifier `%s` is not valid" % iden)
             idx += 1
 
             # Parse `=` assignment operator

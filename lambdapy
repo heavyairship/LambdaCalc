@@ -18,7 +18,7 @@ if options.filename:
     with open(options.filename) as f:
         expr = parse(f.read())
         count = 0
-        while not expr.terminal():
+        while not expr.normal():
             if options.limit is not None and count >= options.limit:
                 sys.stderr.write("Error: reduction limit exceeded\n")
                 sys.exit(-1)
