@@ -6,7 +6,7 @@ check:
 	cd test && ./test && ./test --file test.l && ./test --file test-let.l && ./test --file ../lambdacalc/stdlib/arithmetic.l && ./test --file ../lambdacalc/stdlib/logic.l
 
 clean:
-	rm -rf *pyc __pycache__/ build/ dist/ lambda_calc.egg-info/
+	rm -rf *pyc __pycache__/ lambdacalc/__pycache__ lambdacalc/*pyc build/ dist/ lambdacalc.egg-info/
 
 upload:
 	python3 -m twine upload --repository testpypi dist/*

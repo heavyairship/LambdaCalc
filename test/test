@@ -100,9 +100,12 @@ if options.filename:
         rawInput = f.read()
         print("Raw input: %s" % rawInput[0:-1])
         parsedExpr = parse(rawInput)
-        print("Parsed expression: %s" % parsedExpr)
-        redExpr = parsedExpr.bigRed()
-        print("Reduced expression: %s" % redExpr)
+        if parsedExpr is not None:
+            print("Parsed expression: %s" % parsedExpr)
+            redExpr = parsedExpr.bigRed()
+            print("Reduced expression: %s" % redExpr)
+        else:
+            print("Parsed empty expression")
     print("Done")
 else:
     print()
