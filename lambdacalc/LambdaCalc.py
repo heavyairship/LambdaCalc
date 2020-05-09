@@ -176,9 +176,8 @@ def symbolic(iden):
 def validIden(iden):
     return alphanumeric(iden) or symbolic(iden)
 
-def getBindings(tokens):
+def parseBindings(tokens, bindings):
     idx = 0
-    bindings = {}
 
     while idx < len(tokens):
         t = tokens[idx]
@@ -218,7 +217,7 @@ def getBindings(tokens):
         
 def parseTokens(tokens, bindings):            
     if len(tokens) == 0:
-        raise ValueError("Empty expressions not allowed")
+        return None
     if len(tokens) == 1:
         return parseTerm(tokens[0], bindings)
     stack = []
@@ -245,12 +244,11 @@ def parseTokens(tokens, bindings):
         # Happens if input only contains let bindings
         return None
              
-bindings = {}
 def parse(data):
     global bindings
     loadstdlib()
     tokens = tokenize(data)
-    bindings.update(getBindings(tokens))
+    bindings.update(parseBindings(tokens, bindings))
     return parseTokens(tokens, bindings)
         
 counter = -1
@@ -267,6 +265,7 @@ def resetFresh():
 # Load the standard library
 import os
 stdlibLoaded = False
+bindings = {}
 def loadstdlib():
     global bindings
     global stdlibLoaded
@@ -277,7 +276,7 @@ def loadstdlib():
     filenames = ['arithmetic.l', 'logic.l']
     for fname in filenames:
         with open(os.path.join(prefix, fname)) as f:
-            bindings.update(getBindings(tokenize(f.read())))
+            bindings.update(parseBindings(tokenize(f.read()), bindings))
 
 ##########################################################################
 # Church Encoding
