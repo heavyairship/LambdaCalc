@@ -24,10 +24,7 @@ if options.filename:
                 sys.exit(-1)
             expr = expr.red()
             count += 1
-        try:
-            print(decode(expr))
-        except ValueError:
-            print(expr)
+        print(decode(expr))
         sys.exit()
 
 ##########################################################################
@@ -46,9 +43,7 @@ while True:
         expr = parse(data)
         if expr is not None:
             expr = expr.bigRed()
-            try:
-                print(decode(expr))
-            except ValueError:
-                print(expr)
+            print(decode(expr))
     except Exception as e:
+        raise e
         print("parse error: %s" % e)

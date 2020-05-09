@@ -50,26 +50,26 @@ def testChurchEncoding():
     one = "(Lf.(Lx.(f x)))"
     two = "(Lf.(Lx.(f (f x))))"
     three = "(Lf.(Lx.(f (f (f x)))))"
-    assert str(encode(0)) == zero
-    assert str(encode(1)) == one
-    assert str(encode(2)) == two
-    assert str(encode(3)) == three
+    assert str(encodeI(0)) == zero
+    assert str(encodeI(1)) == one
+    assert str(encodeI(2)) == two
+    assert str(encodeI(3)) == three
 
     # Test decoding
-    assert decode(parse(zero)) == 0
-    assert decode(parse(one)) == 1
-    assert decode(parse(two)) == 2
-    assert decode(parse(three)) == 3
+    assert decodeI(parse(zero)) == 0
+    assert decodeI(parse(one)) == 1
+    assert decodeI(parse(two)) == 2
+    assert decodeI(parse(three)) == 3
 
-    # Test inverse property for encode/decode
-    assert decode(encode(0)) == 0
-    assert decode(encode(1)) == 1
-    assert decode(encode(2)) == 2
-    assert decode(encode(3)) == 3
-    assert str(encode(decode(parse(zero)))) == zero
-    assert str(encode(decode(parse(one)))) == one
-    assert str(encode(decode(parse(two)))) == two
-    assert str(encode(decode(parse(three)))) == three
+    # Test inverse property for encodeI/decodeI
+    assert decodeI(encodeI(0)) == 0
+    assert decodeI(encodeI(1)) == 1
+    assert decodeI(encodeI(2)) == 2
+    assert decodeI(encodeI(3)) == 3
+    assert str(encodeI(decodeI(parse(zero)))) == zero
+    assert str(encodeI(decodeI(parse(one)))) == one
+    assert str(encodeI(decodeI(parse(two)))) == two
+    assert str(encodeI(decodeI(parse(three)))) == three
     print("Unit tests for Church encodings passed!")
 
 def testInfiniteLoop():

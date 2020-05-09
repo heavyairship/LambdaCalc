@@ -143,7 +143,7 @@ def parseTerm(t, bindings):
     # FixMe: need better name for this. Or better, a way to avoid needing this.
     if type(t) == str:
         if numeric(t):
-            return encode(int(t))   
+            return encodeI(int(t))   
         elif t in bindings:
             return bindings[t]
         elif validIden(t):
@@ -290,30 +290,53 @@ def loadstdlib():
 
 ##########################################################################
 # Church Encoding
-def encode(n):
+def decode(l):
+    try:
+        return decodeB(l)
+    except ValueError:
+        pass
+    try:
+        return decodeI(l)
+    except ValueError:
+        pass
+    return l
+
+def encodeI(n):
     if not isinstance(n, int):
-        raise TypeError
+        raise TypeError("input must be an int")
     if n < 0:
-        raise ValueError
+        raise ValueError("negative ints not supported")
 
     def body(n):
         return Var("x") if n == 0 else App(Var("f"), body(n-1))
 
     return Abs("f", Abs("x", body(n)))
 
-def decode(l):
+def decodeI(l):
     if not isinstance(l, LambdaExpr):
-        raise TypeError
-    if not l.body:
-        raise ValueError
-    if not l.body.body:
-        raise ValueError
+        raise TypeError("input must be a lambda expression")
+    if not isinstance(l, Abs) or not isinstance(l.body, Abs):
+        raise ValueError("cannot decode expression `%s`" % l)
+    f = l.param
+    x = l.body.param
+    if f == x:
+        raise ValueError("cannot decode expression `%s`" % l)
 
     def decodeBody(b):
-        if isinstance(b, Var):
+        if isinstance(b, Var) and b.var == x:
             return 0
-        if isinstance(b, App):
+        if isinstance(b, App) and isinstance(b.first, Var) and b.first.var == f:
             return 1 + decodeBody(b.second)
-        raise ValueError
+        raise ValueError("cannot decode expression `%s`" % b)
 
     return decodeBody(l.body.body)
+
+# Note that boolean encoding is not required, since `true` and `false`
+# are defined in stdlib.
+
+def decodeB(l):
+    if str(l) == "(Lx.(Ly.x))":
+        return True
+    if str(l) == "(Lx.(Ly.y))":
+        return False
+    raise ValueError("cannot decode expression `%s`" % l)
