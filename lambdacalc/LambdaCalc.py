@@ -176,19 +176,6 @@ def symbolic(iden):
 def validIden(iden):
     return alphanumeric(iden) or symbolic(iden)
 
-def stdlib():
-    # Logic
-    """
-    let true = (Lx.(Ly.x));
-    let false = (Lx.(Ly.y));
-    let && = (Lm.(Ln.(Lx.(Ly.((m ((n x) y)) y)))));
-    let || = (Lm.(Ln.(Lx.(Ly.((m x) ((n x) y))))));
-    let ! = (Lm.(Lx.(Ly.((m y) x))));
-    let -> = (Lm.(Ln.((|| (! m)) n)));
-    """
-    # Arithmetic
-    """
-    """
 def getBindings(tokens):
     idx = 0
     bindings = {}
@@ -219,6 +206,7 @@ def getBindings(tokens):
 
             # Parse expression and add to bindings
             expr = parseTokens(tokens[begin:end], bindings)
+            assert expr is not None
             bindings[iden] = expr
 
             # Parse `;` terminator
@@ -249,13 +237,20 @@ def parseTokens(tokens, bindings):
                 exprTokens.insert(0, stack.pop(-1))
                 stack.append(parseExpr(exprTokens, bindings))
         idx += 1
-    if len(stack) != 1:
+    if len(stack) > 1:
         raise ValueError("Expected end of input but found more tokens")
-    return parseTerm(stack[0], bindings)
+    elif len(stack) == 1:
+        return parseTerm(stack[0], bindings)
+    else:
+        # Happens if input only contains let bindings
+        return None
              
+bindings = {}
 def parse(data):
+    global bindings
+    loadstdlib()
     tokens = tokenize(data)
-    bindings = getBindings(tokens)
+    bindings.update(getBindings(tokens))
     return parseTokens(tokens, bindings)
         
 counter = -1
@@ -267,6 +262,22 @@ def fresh():
 def resetFresh():
     global counter
     counter = -1
+
+##########################################################################
+# Load the standard library
+import os
+stdlibLoaded = False
+def loadstdlib():
+    global bindings
+    global stdlibLoaded
+    if stdlibLoaded:
+        return
+    stdlibLoaded = True
+    prefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), "stdlib")
+    filenames = ['arithmetic.l', 'logic.l']
+    for fname in filenames:
+        with open(os.path.join(prefix, fname)) as f:
+            bindings.update(getBindings(tokenize(f.read())))
 
 ##########################################################################
 # Church Encoding

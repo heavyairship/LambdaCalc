@@ -40,6 +40,8 @@ while True:
     if data in ["quit", "quit()", "exit", "exit()"]:
         sys.exit()
     try:
-        print(parse(data).red())
+        expr = parse(data)
+        if expr is not None:
+            print(expr.bigRed())
     except Exception as e:
-        print(e)
+        print("parse error: %s" % e)
