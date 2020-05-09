@@ -132,10 +132,8 @@ def tokenize(data):
                 tokens.append(var)
                 var = ''
             tokens.append(c)
-        elif alphanumeric(c):
-            var += c
         else:
-            raise ValueError("Illegal variable character `%s`" % c) 
+            var += c
     if var != '':
         tokens.append(var)
         var = ''
@@ -144,9 +142,15 @@ def tokenize(data):
 def parseTerm(t, bindings):
     # FixMe: need better name for this. Or better, a way to avoid needing this.
     if type(t) == str:
-        if t in bindings:
+        if numeric(t):
+            return encode(int(t))   
+        elif t in bindings:
             return bindings[t]
-        return Var(t) 
+        elif validIden(t):
+            return Var(t) 
+        else:
+            raise ValueError("Invalid identifier `%s`" % t)
+    assert isinstance(t, LambdaExpr)
     return t
 
 def parseExpr(tokens, bindings):
@@ -161,9 +165,9 @@ def parseExpr(tokens, bindings):
     else:
         raise ValueError("Could not parse tokens `%s`" % str(tokens))
 
-def alphanumeric(iden):
+def alphabetic(iden):
     for c in iden:
-        if (c < 'a' or c > 'z') and (c < 'A' or c > 'Z') and (c < '1' and c > '9'):
+        if (c < 'a' or c > 'z') and (c < 'A' or c > 'Z'):
             return False
     return True
 
@@ -173,8 +177,14 @@ def symbolic(iden):
             return False
     return True
 
+def numeric(iden):
+    for c in iden:
+        if c < '0' or c > '9':
+            return False
+    return True
+
 def validIden(iden):
-    return alphanumeric(iden) or symbolic(iden)
+    return alphabetic(iden) or symbolic(iden)
 
 def parseBindings(tokens, bindings):
     idx = 0
@@ -307,8 +317,3 @@ def decode(l):
         raise ValueError
 
     return decodeBody(l.body.body)
-
-def succ(l):
-    if not isinstance(l, LambdaExpr):
-        raise TypeError
-    return App(parse("(Ln.(Lf.(Lx.(f ((n f) x)))))"), l).bigRed()

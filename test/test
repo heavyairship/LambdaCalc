@@ -70,11 +70,6 @@ def testChurchEncoding():
     assert str(encode(decode(parse(one)))) == one
     assert str(encode(decode(parse(two)))) == two
     assert str(encode(decode(parse(three)))) == three
-
-    # Test successor function
-    assert str(succ(parse(zero))) == one
-    assert str(succ(parse(one))) == two
-    assert str(succ(parse(two))) == three
     print("Unit tests for Church encodings passed!")
 
 def testInfiniteLoop():
