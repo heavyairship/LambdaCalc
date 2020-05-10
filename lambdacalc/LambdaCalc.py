@@ -152,7 +152,7 @@ def parseTerm(t, bindings):
         elif validIden(t):
             return Var(t) 
         else:
-            raise ValueError("Invalid identifier `%s`" % t)
+            raise ValueError("invalid identifier `%s`" % t)
     assert isinstance(t, LambdaExpr)
     return t
 
@@ -166,7 +166,7 @@ def parseExpr(tokens, bindings):
     if len(tokens) == 2:
         return App(parseTerm(tokens[0], bindings), parseTerm(tokens[1], bindings))
     else:
-        raise ValueError("Could not parse tokens `%s`" % [str(t) for t in tokens])
+        raise ValueError("could not parse tokens `%s`" % [str(t) for t in tokens])
 
 def alphabetic(c):
     return ('a' <= c and c <= 'z') or ('A' <= c and c <= 'Z')
@@ -202,13 +202,13 @@ def parseBindings(tokens, bindings):
             # Parse identifier
             iden = tokens[idx]
             if not validIden(iden):
-                raise ValueError("Identifier `%s` is not valid" % iden)
+                raise ValueError("identifier `%s` is not valid" % iden)
             idx += 1
 
             # Parse `=` assignment operator
             assn = tokens[idx]
             if not assn == "=":
-                raise ValueError("Expected assignment operator `=` not `%s`" % assn)
+                raise ValueError("expected assignment operator `=` not `%s`" % assn)
             idx += 1
 
             # Find beginning/end for expression 
@@ -320,7 +320,9 @@ def loadstdlib():
         return
     stdlibLoaded = True
     prefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), "stdlib")
-    filenames = ['arithmetic.l', 'logic.l']
+    # This ordering is important, e.g. since pair.l depends on logic.l
+    # FixMe: implement some kind of dependency system.
+    filenames = ['logic.l', 'arithmetic.l', 'pair.l', 'list.l']
     for fname in filenames:
         with open(os.path.join(prefix, fname)) as f:
             bindings.update(parseBindings(tokenize(f.read()), bindings))
