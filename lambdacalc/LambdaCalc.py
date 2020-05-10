@@ -324,18 +324,18 @@ def decodeI(l):
     if not isinstance(l, LambdaExpr):
         raise TypeError("input must be a lambda expression")
     if not isinstance(l, Abs) or not isinstance(l.body, Abs):
-        raise ValueError("cannot decode expression `%s`" % l)
+        raise ValueError("cannot decode expression")
     f = l.param
     x = l.body.param
     if f == x:
-        raise ValueError("cannot decode expression `%s`" % l)
+        raise ValueError("cannot decode expression")
 
     def decodeBody(b):
         if isinstance(b, Var) and b.var == x:
             return 0
         if isinstance(b, App) and isinstance(b.first, Var) and b.first.var == f:
             return 1 + decodeBody(b.second)
-        raise ValueError("cannot decode expression `%s`" % b)
+        raise ValueError("cannot decode expression")
 
     return decodeBody(l.body.body)
 
@@ -346,14 +346,14 @@ def decodeB(l):
     if not isinstance(l, LambdaExpr):
         raise TypeError("input must be a lambda expression")
     if not isinstance(l, Abs) or not isinstance(l.body, Abs):
-        raise ValueError("cannot decode expression `%s`" % l)
+        raise ValueError("cannot decode expression")
     x = l.param
     y = l.body.param
     b = l.body.body
     if not isinstance(b, Var):
-        raise ValueError("cannot decode expression `%s`" % l)
+        raise ValueError("cannot decode expression")
     if b.var == x:
         return True
     if b.var == y:
         return False
-    raise ValueError("cannot decode expression `%s`" % l)
+    raise ValueError("cannot decode expression")
