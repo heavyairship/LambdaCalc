@@ -30,21 +30,30 @@ if options.filename:
 
 ##########################################################################
 # REPL mode
-# FixMe: enable arrow movement/editing the current line in the CLI
-while True:
-    try:
-        data = input("> ")
-    except EOFError:
-        sys.exit()
-    except KeyboardInterrupt:
-        sys.exit()
-    if data in ["quit", "quit()", "exit", "exit()"]:
-        sys.exit()
-    try:
-        expr = parse(data)
-        if expr is None:
-            continue
-        expr = expr.bigRed()
-        print(decode(expr))
-    except Exception as e:
-        print("parse error: %s" % e)
+
+import cmd
+
+class LambdaCalcRepl(cmd.Cmd):
+    prompt = '> '
+    intro = """
+λλλλλλλλλλλλλλλλλλλλλλλλλλλλλ
+λλλ Welcome to LambdaCalc λλλ
+λλλλλλλλλλλλλλλλλλλλλλλλλλλλλ
+"""
+    done = False
+    def precmd(self, line):
+        if line in ["quit", "quit()", "exit", "exit()", "EOF"]:
+            sys.exit()
+        try:
+            expr = parse(line)
+            if expr is None:
+                return line
+            expr = expr.bigRed()
+            print(decode(expr))
+        except Exception as e:
+            print("parse error: %s" % e)
+        return line
+    def default(self, line):
+        pass
+
+LambdaCalcRepl().cmdloop()
