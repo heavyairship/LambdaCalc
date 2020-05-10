@@ -212,8 +212,10 @@ def parseBindings(tokens, bindings):
 
             # Find beginning/end for expression 
             begin = idx
-            while tokens[idx] != ";":
+            while idx < len(tokens) and tokens[idx] != ';':
                 idx += 1
+            if idx >= len(tokens):
+                raise ValueError("expected token `;`")
             end = idx
 
             # Parse expression and add to bindings
@@ -238,8 +240,10 @@ def parseTokens(tokens, bindings):
     while idx < len(tokens):
         t = tokens[idx]
         if t == 'let':
-            while tokens[idx] != ';':
+            while idx < len(tokens) and tokens[idx] != ';':
                 idx += 1
+            if idx >= len(tokens):
+                raise ValueError("expected token `;`")
         else:
             stack.append(t)
             if t == ')':
