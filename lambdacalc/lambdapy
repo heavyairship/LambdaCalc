@@ -7,6 +7,9 @@ from lambdacalc.LambdaCalc import *
 from optparse import OptionParser
 import sys
 
+# FixMe: convert reduction algorithms fromm recursive to iterative ones.
+sys.setrecursionlimit(5000)
+
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
 parser.add_option("-l", "--limit", dest="limit", help="max number of reductions to apply", type=int)
