@@ -17,6 +17,8 @@ parser.add_option("-l", "--limit", dest="limit", help="max number of reductions 
 if options.filename:
     with open(options.filename) as f:
         expr = parse(f.read())
+        if expr is None:
+            sys.exit()
         count = 0
         while not expr.normal():
             if options.limit is not None and count >= options.limit:
@@ -25,7 +27,6 @@ if options.filename:
             expr = expr.red()
             count += 1
         print(decode(expr))
-        sys.exit()
 
 ##########################################################################
 # REPL mode
@@ -41,9 +42,9 @@ while True:
         sys.exit()
     try:
         expr = parse(data)
-        if expr is not None:
-            expr = expr.bigRed()
-            print(decode(expr))
+        if expr is None:
+            continue
+        expr = expr.bigRed()
+        print(decode(expr))
     except Exception as e:
-        raise e
         print("parse error: %s" % e)
