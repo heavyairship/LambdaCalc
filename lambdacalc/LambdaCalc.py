@@ -118,6 +118,9 @@ class App(LambdaExpr):
 def whitespace(c):
     return c in ['\t', '\r', '\n', ' ']
 
+def separator(c):
+    return c in ['let', '=', ';', '(', ')', '.', 'L']
+
 def tokenize(data):
     tokens = []
     var = ''
@@ -127,7 +130,7 @@ def tokenize(data):
             if var != '':
                 tokens.append(var)
                 var = ''
-        elif c in ['let', '=', ';', '(', ')', '.', 'L']:
+        elif separator(c):
             if var != '':
                 tokens.append(var)
                 var = ''
@@ -163,7 +166,7 @@ def parseExpr(tokens, bindings):
     if len(tokens) == 2:
         return App(parseTerm(tokens[0], bindings), parseTerm(tokens[1], bindings))
     else:
-        raise ValueError("Could not parse tokens `%s`" % str(tokens))
+        raise ValueError("Could not parse tokens `%s`" % [str(t) for t in tokens])
 
 def alphabetic(iden):
     for c in iden:
@@ -184,7 +187,7 @@ def numeric(iden):
     return True
 
 def validIden(iden):
-    return alphabetic(iden) or symbolic(iden)
+    return isinstance(iden, str) and iden != 'L' and (alphabetic(iden) or symbolic(iden))
 
 def parseBindings(tokens, bindings):
     idx = 0
@@ -245,10 +248,15 @@ def parseTokens(tokens, bindings):
                     exprTokens.insert(0, stack.pop(-1))
                 exprTokens.insert(0, stack.pop(-1))
                 stack.append(parseExpr(exprTokens, bindings))
+            while len(stack) >= 2 and not separator(stack[-1]) and not separator(stack[-2]):
+                # Allow shorthand applications. E.g. a b or a b c, instead of (a b) or
+                # ((a b) c), respectively.
+                exprTokens = []
+                exprTokens.insert(0, stack.pop(-1))
+                exprTokens.insert(0, stack.pop(-1))
+                stack.append(parseExpr(exprTokens, bindings))
         idx += 1
-    if len(stack) > 1:
-        raise ValueError("Expected end of input but found more tokens")
-    elif len(stack) == 1:
+    if len(stack) == 1:
         return parseTerm(stack[0], bindings)
     else:
         # Happens if input only contains let bindings
@@ -335,8 +343,17 @@ def decodeI(l):
 # are defined in stdlib.
 
 def decodeB(l):
-    if str(l) == "(Lx.(Ly.x))":
+    if not isinstance(l, LambdaExpr):
+        raise TypeError("input must be a lambda expression")
+    if not isinstance(l, Abs) or not isinstance(l.body, Abs):
+        raise ValueError("cannot decode expression `%s`" % l)
+    x = l.param
+    y = l.body.param
+    b = l.body.body
+    if not isinstance(b, Var):
+        raise ValueError("cannot decode expression `%s`" % l)
+    if b.var == x:
         return True
-    if str(l) == "(Lx.(Ly.y))":
+    if b.var == y:
         return False
     raise ValueError("cannot decode expression `%s`" % l)
