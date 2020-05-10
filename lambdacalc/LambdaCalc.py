@@ -161,24 +161,18 @@ def parseExpr(tokens, bindings):
         tokens = tokens[1:-1]
     if len(tokens) == 1:
         return parseTerm(tokens[0], bindings)
-    if len(tokens) == 4 and tokens[0] == 'L' and tokens[2] == '.':
-        return Abs(tokens[1], parseTerm(tokens[3], bindings))
+    if len(tokens) >= 4 and tokens[-4] == 'L' and tokens[-2] == '.':
+        return Abs(tokens[-3], parseTerm(tokens[-1], bindings))
     if len(tokens) == 2:
         return App(parseTerm(tokens[0], bindings), parseTerm(tokens[1], bindings))
     else:
         raise ValueError("Could not parse tokens `%s`" % [str(t) for t in tokens])
 
-def alphabetic(iden):
-    for c in iden:
-        if (c < 'a' or c > 'z') and (c < 'A' or c > 'Z'):
-            return False
-    return True
+def alphabetic(c):
+    return ('a' <= c and c <= 'z') or ('A' <= c and c <= 'Z')
 
-def symbolic(iden):
-    for c in iden:
-        if c not in ['|', '&', '^', '!', '~', '*', '+', '/', '-', '%', '$', '@', '<', '>']:
-            return False
-    return True
+def symbolic(c):
+    return c in ['|', '&', '^', '!', '~', '*', '+', '/', '-', '%', '$', '@', '<', '>']
 
 def numeric(iden):
     for c in iden:
@@ -187,7 +181,14 @@ def numeric(iden):
     return True
 
 def validIden(iden):
-    return isinstance(iden, str) and iden != 'L' and (alphabetic(iden) or symbolic(iden))
+    if numeric(iden):
+        return False
+    for c in iden:
+        if c == 'L':
+            return False
+        if not symbolic(c) and not alphabetic(c) and not numeric(c):
+            return False
+    return True
 
 def parseBindings(tokens, bindings):
     idx = 0
@@ -231,6 +232,7 @@ def parseBindings(tokens, bindings):
     return bindings
         
 def parseTokens(tokens, bindings):            
+    # FixMe: this function is pretty hacky.
     if len(tokens) == 0:
         return None
     if len(tokens) == 1:
@@ -238,8 +240,11 @@ def parseTokens(tokens, bindings):
     stack = []
     idx = 0
     while idx < len(tokens):
+
         t = tokens[idx]
+
         if t == 'let':
+            # Skip over let bindings
             while idx < len(tokens) and tokens[idx] != ';':
                 idx += 1
             if idx >= len(tokens):
@@ -250,21 +255,41 @@ def parseTokens(tokens, bindings):
                 exprTokens = []
                 while stack[-1] != '(':
                     exprTokens.insert(0, stack.pop(-1))
+                    if len(stack) == 0:
+                        raise ValueError("expected token `(`")
                 exprTokens.insert(0, stack.pop(-1))
-                stack.append(parseExpr(exprTokens, bindings))
+                stack.append(parseTokens(exprTokens[1:-1], bindings))
             while len(stack) >= 2 and not separator(stack[-1]) and not separator(stack[-2]):
                 # Allow shorthand applications. E.g. a b or a b c, instead of (a b) or
                 # ((a b) c), respectively.
                 exprTokens = []
-                exprTokens.insert(0, stack.pop(-1))
-                exprTokens.insert(0, stack.pop(-1))
+                for i in range(2):
+                    exprTokens.insert(0, stack.pop(-1))
                 stack.append(parseExpr(exprTokens, bindings))
         idx += 1
+
+    while len(stack) >= 4:
+        # Allow shorthand abstractions. E.g. Lx.Ly.z instead of (Lx.(Ly.z))
+        exprTokens = []
+        for i in range(4):
+            exprTokens.insert(0, stack.pop(-1))
+        stack.append(parseExpr(exprTokens, bindings))
+
+    while len(stack) >= 2 and not separator(stack[-1]) and not separator(stack[-2]):
+        # Allow shorthand applications. E.g. a b or a b c, instead of (a b) or
+        # ((a b) c), respectively.
+        exprTokens = []
+        for i in range(2):
+            exprTokens.insert(0, stack.pop(-1))
+        stack.append(parseExpr(exprTokens, bindings))
+
     if len(stack) == 1:
         return parseTerm(stack[0], bindings)
-    else:
+    elif len(stack) == 0:
         # Happens if input only contains let bindings
         return None
+    else:
+        raise ValueError("invalid stack %s" % stack)
              
 def parse(data):
     global bindings
