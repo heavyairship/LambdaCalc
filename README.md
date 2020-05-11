@@ -94,7 +94,7 @@ y
 ### Church Encodings
 
 The parser uses Church Encodings to encode (input) and decode (output) integers. All arithmetic evaluation is
-done in the Lambda Calculus, using these encodings:
+done in the Lambda Calculus:
 
 ```
 > 42
