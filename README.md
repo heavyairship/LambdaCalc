@@ -46,7 +46,7 @@ You can also build an expression directly:
 To run the interpreter as a REPL:
 ```
 $ lambdapy
-> ((Lx.x) y)
+> (Lx.x) y
 y
 ```
 
@@ -59,6 +59,120 @@ $ lambdapy --file test.l
 For more info run:
 ```
 $ lambdapy --help
+```
+
+## Details
+
+### Let-bindings
+
+Let-bindings are supported:
+
+```
+> let a = Lx.x;
+> a
+(Lx.x)
+```
+
+And they can refer to identifiers defined by previous let-bindings:
+
+```
+> let a = Lx.x;
+> let b = a y;
+> b
+y
+```
+
+In identifier can be defined by a let-binding multiple times; the most recent one is used:
+
+```
+> let a = x;
+> let a = y;
+> a
+y
+```
+
+### Church Encodings
+
+The parser uses Church Encodings to encode (input) and decode (output) integers. All arithmetic evaluation is
+done in the Lambda Calculus, using these encodings:
+
+```
+> 42
+42
+> Lf.Lx.f (f (f x))
+3
+```
+
+### Stdlib
+
+The standard library contains let-bindings for useful things, like logical constants and connectives, 
+arithmetic functions, pairs, lists, etc. Note that this is a work in progress. Here are some examples.
+
+#### Arithmetic
+```
+> ++ 1
+2
+> + 2 3
+5
+> * 4 3
+12
+> ^ 2 3
+8
+```
+
+#### Logic
+```
+> true
+True
+> false
+False
+> && true false
+False
+> || false true
+True
+> -> false true
+True
+> if true 1 2
+1
+> if false 1 2
+2
+```
+
+#### Pairs
+```
+> let p = pair a b;
+> first p
+y
+> second p
+y
+````
+
+#### Lists
+```
+> let l = (cons 1 (cons 2 nil));
+> head l
+1
+> head (tail l)
+2
+> isnil l
+False
+> isnil (tail (tail l))
+True
+```
+
+### Parentheses
+
+Implied parentheses may be omitted; applications are left-associative:
+
+```
+> M N
+(M N)
+> M (N) O (P Q)
+(((M N) O) (P Q))
+> Lx.x
+(Lx.x)
+> Lx.Ly.Lz.a b c
+(Lx.(Ly.(Lz.((a b) c))))
 ```
 
 ## Tests
