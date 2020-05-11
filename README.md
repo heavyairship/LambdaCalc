@@ -82,7 +82,7 @@ And they can refer to identifiers defined by previous let-bindings:
 y
 ```
 
-In identifier can be defined by a let-binding multiple times; the most recent one is used:
+An identifier can be defined by a let-binding multiple times; the most recent one is used:
 
 ```
 > let a = x;
