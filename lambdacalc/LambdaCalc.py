@@ -78,6 +78,9 @@ class Abs(LambdaExpr):
             return self
         if self.param in expr.free():
             f = fresh()
+            selfFree = self.free()
+            while (f in selfFree) or (f == self.param):
+                f = fresh()
             return Abs(f, self.body.sub(self.param, Var(f))).sub(var, expr)
         return Abs(self.param, self.body.sub(var, expr)) 
     def free(self):
