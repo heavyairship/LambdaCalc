@@ -113,6 +113,16 @@ class App(LambdaExpr):
     def __str__(self):
         return "(%s %s)" % (str(self.first), str(self.second))
 
+counter = -1
+def fresh():
+    global counter
+    counter += 1
+    return "@%d" % counter
+
+def resetFresh():
+    global counter
+    counter = -1
+
 ##########################################################################
 # Parsing
 def whitespace(c):
@@ -143,30 +153,17 @@ def tokenize(data):
     return tokens
 
 def parseTerm(t, bindings):
-    # FixMe: need better name for this. Or better, a way to avoid needing this.
-    if type(t) == str:
-        if numeric(t):
-            return encodeI(int(t))   
-        elif t in bindings:
-            return bindings[t]
-        elif validIden(t):
-            return Var(t) 
-        else:
-            raise ValueError("invalid identifier `%s`" % t)
-    assert isinstance(t, LambdaExpr)
-    return t
-
-def parseExpr(tokens, bindings):
-    while tokens[0] == '(' and tokens[-1] == ')':
-        tokens = tokens[1:-1]
-    if len(tokens) == 1:
-        return parseTerm(tokens[0], bindings)
-    if len(tokens) >= 4 and tokens[-4] == 'L' and tokens[-2] == '.':
-        return Abs(tokens[-3], parseTerm(tokens[-1], bindings))
-    if len(tokens) == 2:
-        return App(parseTerm(tokens[0], bindings), parseTerm(tokens[1], bindings))
+    # Terms are integers, bound identifiers, and variables 
+    if not isinstance(t, str):
+        raise TypeError("expected to parse term from string")
+    if numeric(t):
+        return encodeI(int(t))   
+    elif t in bindings:
+        return bindings[t]
+    elif validIden(t):
+        return Var(t) 
     else:
-        raise ValueError("could not parse tokens `%s`" % [str(t) for t in tokens])
+        raise ValueError("invalid identifier `%s`" % t)
 
 def alphabetic(c):
     return ('a' <= c and c <= 'z') or ('A' <= c and c <= 'Z')
@@ -192,7 +189,6 @@ def validIden(iden):
 
 def parseBindings(tokens, bindings):
     idx = 0
-
     while idx < len(tokens):
         t = tokens[idx]
         if t == "let":
@@ -230,84 +226,95 @@ def parseBindings(tokens, bindings):
             idx += 1
 
     return bindings
-        
-def parseTokens(tokens, bindings):            
-    # FixMe: this function is pretty hacky.
-    if len(tokens) == 0:
-        return None
-    if len(tokens) == 1:
-        return parseTerm(tokens[0], bindings)
-    stack = []
+
+def removeLetBindings(tokens):
+    out = []
     idx = 0
     while idx < len(tokens):
-
         t = tokens[idx]
-
         if t == 'let':
-            # Skip over let bindings
             while idx < len(tokens) and tokens[idx] != ';':
                 idx += 1
             if idx >= len(tokens):
                 raise ValueError("expected token `;`")
         else:
-            stack.append(t)
-            if t == ')':
-                exprTokens = []
-                while stack[-1] != '(':
-                    exprTokens.insert(0, stack.pop(-1))
-                    if len(stack) == 0:
-                        raise ValueError("expected token `(`")
-                exprTokens.insert(0, stack.pop(-1))
-                stack.append(parseTokens(exprTokens[1:-1], bindings))
-            while len(stack) >= 2 and not separator(stack[-1]) and not separator(stack[-2]):
-                # Allow shorthand applications. E.g. a b or a b c, instead of (a b) or
-                # ((a b) c), respectively.
-                exprTokens = []
-                for i in range(2):
-                    exprTokens.insert(0, stack.pop(-1))
-                stack.append(parseExpr(exprTokens, bindings))
+            out.append(t)
         idx += 1
+    return out
 
-    while len(stack) >= 4:
-        # Allow shorthand abstractions. E.g. Lx.Ly.z instead of (Lx.(Ly.z))
-        exprTokens = []
-        for i in range(4):
-            exprTokens.insert(0, stack.pop(-1))
-        stack.append(parseExpr(exprTokens, bindings))
+def parseTokens(tokens, bindings):
 
-    while len(stack) >= 2 and not separator(stack[-1]) and not separator(stack[-2]):
-        # Allow shorthand applications. E.g. a b or a b c, instead of (a b) or
-        # ((a b) c), respectively.
-        exprTokens = []
-        for i in range(2):
-            exprTokens.insert(0, stack.pop(-1))
-        stack.append(parseExpr(exprTokens, bindings))
+    # Holds parsed expressions
+    stack = []
 
-    if len(stack) == 1:
-        return parseTerm(stack[0], bindings)
-    elif len(stack) == 0:
-        # Happens if input only contains let bindings
-        return None
-    else:
-        raise ValueError("invalid stack %s" % stack)
+    while len(tokens) != 0:
+        if tokens[0] == '(':
+            # Parse expression in `( )`
+
+            # Parse opening `(`
+            temp = []
+            temp.append(tokens.pop(0))
+
+            # Parse until matching `)`
+            left = 1
+            right = 0
+            while left != right and len(tokens) > 0:
+                if tokens[0] == '(':
+                    left += 1
+                if tokens[0] == ')':
+                    right += 1
+                temp.append(tokens.pop(0))
+            if left != right:
+                raise ValueError("could not match parentheses")
+
+            # Recurse on contents between `( )`, leaving off the parentheses
+            stack.append(parseTokens(temp[1:-1], bindings))
+
+        elif tokens[0] == 'L':
+            # Parse abstraction expression, e.g. Lx.M
+
+            # Parse `L`
+            tokens.pop(0)
+
+            # Parse param
+            if len(tokens) == 0:
+                raise ValueError("missing param after `L`")
+            param = tokens.pop(0)
+            if not validIden(param):
+                raise ValueError("`%s` is an invalid abstraction param" % param)
+
+            # Parse `.`
+            if len(tokens) == 0 or tokens.pop(0) != '.':
+                raise ValueError("expected `.` after param")
+
+            # Parse body
+            temp = []
+            while len(tokens) != 0:
+                temp.append(tokens.pop(0))
+
+            # Recurse on body
+            stack.append(Abs(param, parseTokens(temp, bindings)))
+        else:
+            # Parse a term expression (base case)
+            stack.append(parseTerm(tokens.pop(0), bindings))
+
+    while len(stack) > 1:
+        # Parse abstractions in a left-associative manner
+        first = stack.pop(0)
+        second = stack.pop(0)
+        stack.insert(0, App(first, second))
+
+    # Return the parsed expression if it exsits. If there is no expression, 
+    # that means the input was empty or entirely let-bindings.
+    return stack[0] if len(stack) > 0 else None
              
 def parse(data):
     global bindings
     loadstdlib()
     tokens = tokenize(data)
     bindings.update(parseBindings(tokens, bindings))
-    return parseTokens(tokens, bindings)
+    return parseTokens(removeLetBindings(tokens), bindings)
         
-counter = -1
-def fresh():
-    global counter
-    counter += 1
-    return "@%d" % counter
-
-def resetFresh():
-    global counter
-    counter = -1
-
 ##########################################################################
 # Load the standard library
 import os
@@ -330,14 +337,23 @@ def loadstdlib():
 ##########################################################################
 # Church Encoding
 def decode(l):
+
+    # The Church encodings for 0 and False are alpha-equivalent,
+    # so we need to use the hack below to force decoding Lf.Lx.x 
+    # as 0 rather than False.
+    if str(l) == "(Lf.(Lx.x))":
+        return 0
+
     try:
         return decodeB(l)
     except ValueError:
         pass
+
     try:
         return decodeI(l)
     except ValueError:
         pass
+
     return l
 
 def encodeI(n):
