@@ -2,7 +2,6 @@
 
 ##########################################################################
 # Interpreter for the Lambda Calculus
-
 from lambdacalc.LambdaCalc import *
 from optparse import OptionParser
 import sys
@@ -30,12 +29,11 @@ if options.filename:
             expr = expr.red()
             count += 1
         print(decode(expr))
+    sys.exit(0)
 
 ##########################################################################
 # REPL mode
-
 import cmd
-
 class LambdaCalcRepl(cmd.Cmd):
     prompt = '> '
     intro = """
@@ -58,5 +56,4 @@ class LambdaCalcRepl(cmd.Cmd):
         return line
     def default(self, line):
         pass
-
 LambdaCalcRepl().cmdloop()
