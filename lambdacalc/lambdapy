@@ -7,7 +7,7 @@ from lambdacalc.LambdaCalc import *
 from optparse import OptionParser
 import sys
 
-# FixMe: convert reduction algorithms fromm recursive to iterative ones.
+# FixMe: convert reduction algorithms from recursive to iterative ones.
 sys.setrecursionlimit(5000)
 
 parser = OptionParser()
