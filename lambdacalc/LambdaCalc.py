@@ -299,7 +299,7 @@ def parseTokens(tokens, bindings):
             stack.append(parseTerm(tokens.pop(0), bindings))
 
     while len(stack) > 1:
-        # Parse abstractions in a left-associative manner
+        # Parse applications in a left-associative manner
         first = stack.pop(0)
         second = stack.pop(0)
         stack.insert(0, App(first, second))
