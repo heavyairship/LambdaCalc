@@ -142,9 +142,9 @@ True
 ```
 > let p = pair a b;
 > first p
-y
+a
 > second p
-y
+b
 ````
 
 #### Lists
