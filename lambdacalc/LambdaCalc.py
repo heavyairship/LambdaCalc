@@ -220,7 +220,8 @@ def parseBindings(tokens, bindings):
 
             # Parse expression and add to bindings
             expr = parseTokens(tokens[begin:end], bindings)
-            assert expr is not None
+            if expr is None:
+                raise ValueError("empty expressions not allowed");
             bindings[iden] = expr
 
             # Parse `;` terminator
