@@ -332,7 +332,7 @@ def loadstdlib():
     prefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), "stdlib")
     # This ordering is important, e.g. since pair.l depends on logic.l
     # FixMe: implement some kind of dependency system.
-    filenames = ['logic.l', 'arithmetic.l', 'pair.l', 'list.l']
+    filenames = ['logic.l', 'pair.l', 'list.l', 'arithmetic.l']
     for fname in filenames:
         with open(os.path.join(prefix, fname)) as f:
             bindings.update(parseBindings(tokenize(f.read()), bindings))

@@ -6,3 +6,4 @@ let ++ = succ;
 let + = add;
 let * = mul;
 let ^ = pow;
+let fact = LN.first (N ((Lp.pair (* (first p) (second p)) (++ (second p)))) (pair 1 1));
