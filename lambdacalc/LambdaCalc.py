@@ -138,7 +138,6 @@ def tokenize(data):
     tokens = []
     var = ''
     for idx, c in enumerate(data):
-        c = data[idx]
         if whitespace(c):
             if var != '':
                 tokens.append(var)
