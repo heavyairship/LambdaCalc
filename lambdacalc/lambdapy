@@ -35,7 +35,7 @@ if options.filename:
 # REPL mode
 import cmd
 class LambdaCalcRepl(cmd.Cmd):
-    prompt = '> '
+    prompt = 'λ> '
     intro = """
 λλλλλλλλλλλλλλλλλλλλλλλλλλλλλ
 λλλ Welcome to LambdaCalc λλλ
@@ -56,4 +56,7 @@ class LambdaCalcRepl(cmd.Cmd):
         return line
     def default(self, line):
         pass
-LambdaCalcRepl().cmdloop()
+try:
+    LambdaCalcRepl().cmdloop()
+except KeyboardInterrupt:
+    pass
