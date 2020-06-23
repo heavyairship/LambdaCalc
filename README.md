@@ -2,7 +2,7 @@
 
 ## Overview 
  
-This project provides a Python library and interpreter for parsing and reducing Lambda Calculus expressions.
+This project provides a Python library and interpreter for parsing and reducing Lambda Calculus expressions. The reduction strategy used is [Normal Order Reduction to Normal Form](https://www.itu.dk/~sestoft/papers/sestoft-lamreduce.pdf).
 
 ## Prerequisities
 
