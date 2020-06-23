@@ -20,9 +20,11 @@
 class LambdaExpr(object):
     def red_bn(self):
         # Reduction by name
+        # See: https://www.itu.dk/~sestoft/papers/sestoft-lamreduce.pdf
         pass
     def red_no(self):
         # Reduction by normal order
+        # See: https://www.itu.dk/~sestoft/papers/sestoft-lamreduce.pdf
         pass
     def red(self):
         # Default reduction
