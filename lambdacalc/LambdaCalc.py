@@ -18,17 +18,20 @@
 ##########################################################################
 # Abstract base class for a Lambda Calculus Expression
 class LambdaExpr(object):
-    def red(self):
+    def red_bn(self):
+        # Reduction by name
         pass
-    def bigRed(self):
+    def red_no(self):
+        # Reduction by normal order
+        pass
+    def red(self):
+        # Default reduction
         pass
     def app(self, argument):
         pass
     def sub(self, var, expr):
         pass
     def free(self):
-        pass
-    def normal(self):
         pass
     def __str__(self):
         pass
@@ -38,10 +41,12 @@ class LambdaExpr(object):
 class Var(LambdaExpr):
     def __init__(self, var):
         self.var = var
+    def red_bn(self):
+        return self
+    def red_no(self):
+        return self
     def red(self):
-        return self
-    def bigRed(self):
-        return self
+        return self.red_no()
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -52,8 +57,6 @@ class Var(LambdaExpr):
         return self if self.var != var else expr
     def free(self):
         return set([self.var])
-    def normal(self):
-        return True
     def __str__(self):
         return self.var
 
@@ -63,10 +66,12 @@ class Abs(LambdaExpr):
     def __init__(self, param, body):
         self.param = param
         self.body = body
+    def red_bn(self):
+        return self
+    def red_no(self):
+        return Abs(self.param, self.body.red_no())
     def red(self):
-        return Abs(self.param, self.body.red())
-    def bigRed(self):
-        return Abs(self.param, self.body.bigRed())
+        return self.red_no()
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -85,8 +90,6 @@ class Abs(LambdaExpr):
         return Abs(self.param, self.body.sub(var, expr)) 
     def free(self):
         return self.body.free() - set([self.param])
-    def normal(self):
-        return self.body.normal()
     def __str__(self):
         return "(L%s.%s)" % (self.param, str(self.body))
 
@@ -96,11 +99,18 @@ class App(LambdaExpr):
     def __init__(self, first, second):
         self.first = first
         self.second = second
+    def red_bn(self):
+        first = self.first.red_bn()
+        if isinstance(first, Abs):
+            return first.app(self.second).red_bn()
+        return App(first, self.second)
+    def red_no(self):
+        first = self.first.red_bn()
+        if isinstance(first, Abs):
+            return first.app(self.second).red_no()
+        return App(first.red_no(), self.second.red_no())
     def red(self):
-        return self.first.red().app(self.second.red())
-    def bigRed(self):
-        out = self.first.bigRed().app(self.second.bigRed())
-        return out if out.normal() else out.bigRed()
+        return self.red_no()
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -111,8 +121,6 @@ class App(LambdaExpr):
         return App(self.first.sub(var, expr), self.second.sub(var, expr))
     def free(self):
         return self.first.free().union(self.second.free())
-    def normal(self):
-        return self.first.normal() and self.second.normal() and not isinstance(self.first, Abs)
     def __str__(self):
         return "(%s %s)" % (str(self.first), str(self.second))
 
@@ -171,7 +179,7 @@ def alphabetic(c):
     return ('a' <= c and c <= 'z') or ('A' <= c and c <= 'Z')
 
 def symbolic(c):
-    return c in ['|', '&', '^', '!', '~', '*', '+', '/', '-', '%', '$', '@', '<', '>']
+    return c in ["'", '|', '&', '^', '!', '~', '*', '+', '/', '-', '%', '$', '@', '<', '>']
 
 def numeric(iden):
     for c in iden:
@@ -332,7 +340,7 @@ def loadstdlib():
     prefix = os.path.join(os.path.dirname(os.path.realpath(__file__)), "stdlib")
     # This ordering is important, e.g. since pair.l depends on logic.l
     # FixMe: implement some kind of dependency system.
-    filenames = ['logic.l', 'pair.l', 'list.l', 'arithmetic.l']
+    filenames = ['fix.l', 'logic.l', 'pair.l', 'control.l', 'list.l', 'arithmetic.l']
     for fname in filenames:
         with open(os.path.join(prefix, fname)) as f:
             bindings.update(parseBindings(tokenize(f.read()), bindings))

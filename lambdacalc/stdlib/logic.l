@@ -4,7 +4,6 @@ let and = Lm.Ln.Lx.Ly.m ((n x) y) y;
 let or = Lm.Ln.Lx.Ly.m x ((n x) y);
 let not = Lm.Lx.Ly.m y x;
 let imp = Lm.Ln.or (not m) n;
-let if = Lb.Lx.Ly.b x y;
 let && = and;
 let || = or;
 let ! = not;

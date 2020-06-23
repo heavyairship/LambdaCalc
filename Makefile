@@ -6,7 +6,4 @@ install:
 	cp lambdacalc/lambdapy /usr/local/bin/lambdapy
 
 check: clean install
-	cd test && ./test && ./test --file test.l && ./test --file test-let.l && ./test --file ../lambdacalc/stdlib/arithmetic.l && ./test --file ../lambdacalc/stdlib/logic.l && ./test --file ../lambdacalc/stdlib/pair.l && ./test --file ../lambdacalc/stdlib/list.l
-
-upload:
-	python3 -m twine upload --repository testpypi dist/*
+	cd test && ./test && ./test --file test.l && ./test --file test-let.l && ./test --file test-while.l

@@ -11,7 +11,6 @@ sys.setrecursionlimit(5000)
 
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
-parser.add_option("-l", "--limit", dest="limit", help="max number of reductions to apply", type=int)
 (options, args) = parser.parse_args()
 
 ##########################################################################
@@ -21,21 +20,14 @@ if options.filename:
         expr = parse(f.read())
         if expr is None:
             sys.exit()
-        count = 0
-        while not expr.normal():
-            if options.limit is not None and count >= options.limit:
-                sys.stderr.write("Error: reduction limit exceeded\n")
-                sys.exit(-1)
-            expr = expr.red()
-            count += 1
-        print(decode(expr))
-    sys.exit(0)
+        print(decode(expr.red()))
+    sys.exit()
 
 ##########################################################################
 # REPL mode
 import cmd
 class LambdaCalcRepl(cmd.Cmd):
-    prompt = 'λ> '
+    prompt = '> '
     intro = """
 λλλλλλλλλλλλλλλλλλλλλλλλλλλλλ
 λλλ Welcome to LambdaCalc λλλ
@@ -49,8 +41,7 @@ class LambdaCalcRepl(cmd.Cmd):
             expr = parse(line)
             if expr is None:
                 return line
-            expr = expr.bigRed()
-            print(decode(expr))
+            print(decode(expr.red()))
         except Exception as e:
             print("parse error: %s" % e)
         return line

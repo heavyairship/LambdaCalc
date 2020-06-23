@@ -75,11 +75,13 @@ def testChurchEncoding():
 def testInfiniteLoop():
     print("Running infinite loop tests...")
     infloop = parse("((Lx.(x x)) (Lx.(x x)))")
-    for i in range(10):
-        assert str(infloop) == str(infloop.red())
-        infloop = infloop.red()
     try:
-        infloop.bigRed()
+        infloop.red()
+        assert False
+    except RecursionError:
+        pass
+    try:
+        infloop.red()
         assert False
     except RecursionError:
         pass
@@ -97,7 +99,7 @@ if options.filename:
         parsedExpr = parse(rawInput)
         if parsedExpr is not None:
             print("Parsed expression: %s" % parsedExpr)
-            redExpr = parsedExpr.bigRed()
+            redExpr = parsedExpr.red()
             print("Reduced expression: %s" % redExpr)
         else:
             print("Parsed empty expression")
