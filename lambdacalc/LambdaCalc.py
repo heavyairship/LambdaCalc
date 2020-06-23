@@ -12,8 +12,9 @@
 # (M N)  Application: Application of a function M to an argument N, both
 #        of which are lambda terms.
 #
-# Note that extra parentheses are allowed by the parser, but the 
-# parentheses around Abstractions and Applications are required.
+# Parentheses may be omitted, in which case the following rules apply: 
+# the body of an Abstraction extends as far right as possible; and 
+# Applications are left-associative.
 
 ##########################################################################
 # Abstract base class for a Lambda Calculus Expression
