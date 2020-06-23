@@ -1,3 +1,3 @@
-let cond = Ls.pair zzz false;
-let body = Ls.v;
-let res = while cond body;
+let cond = Ls.pair s (<> s 0);
+let body = Ls.-- s;
+(while cond body) 2

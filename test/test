@@ -100,7 +100,7 @@ if options.filename:
         if parsedExpr is not None:
             print("Parsed expression: %s" % parsedExpr)
             redExpr = parsedExpr.red()
-            print("Reduced expression: %s" % redExpr)
+            print("Reduced expression: %s" % decode(redExpr))
         else:
             print("Parsed empty expression")
     print("Done")
