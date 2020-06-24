@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 
 import sys
+import time
 from optparse import OptionParser
 from lambdacalc.LambdaCalc import *
 
@@ -8,37 +9,38 @@ def testReductions():
     print("Running reduction unit tests...")
 
     # Simple formulas
-    assert str(Var("x").red()) == "x"
-    assert str(Abs("x", Var("M")).red()) == "(Lx.M)"
-    assert str(App(Var("M"), Var("N")).red()) == "(M N)"
+    print(str(reduce(Var("x"))))
+    assert str(reduce(Var("x"))) == "x"
+    assert str(reduce(Abs("x", Var("M")))) == "(Lx.M)"
+    assert str(reduce(App(Var("M"), Var("N")))) == "(M N)"
 
     # Applications of variables
-    assert str(App(Var("x"), Var("y")).red()) == "(x y)"
-    assert str(App(Var("x"), Abs("x", Var("M"))).red()) == "(x (Lx.M))"
-    assert str(App(Var("x"), App(Var("M"), Var("N"))).red()) == "(x (M N))"
+    assert str(reduce(App(Var("x"), Var("y")))) == "(x y)"
+    assert str(reduce(App(Var("x"), Abs("x", Var("M"))))) == "(x (Lx.M))"
+    assert str(reduce(App(Var("x"), App(Var("M"), Var("N"))))) == "(x (M N))"
 
     # Applications of basic abstractions
-    assert str(App(Abs("x", Var("x")), Var("x")).red()) == "x"
-    assert str(App(Abs("x", Var("x")), Abs("x", Var("x"))).red()) == "(Lx.x)"
-    assert str(App(Abs("x", Var("x")), App(Var("M"), Var("N"))).red()) == "(M N)"
+    assert str(reduce(App(Abs("x", Var("x")), Var("x")))) == "x"
+    assert str(reduce(App(Abs("x", Var("x")), Abs("x", Var("x"))))) == "(Lx.x)"
+    assert str(reduce(App(Abs("x", Var("x")), App(Var("M"), Var("N"))))) == "(M N)"
 
     # Application of abstraction with capture-avoiding substitution
-    assert str(App(Abs("x", Var("M")), Var("x")).red()) == "M"
-    assert str(App(Abs("x", Var("M")), Var("z")).red()) == "M"
-    assert str(App(Abs("x", Var("x")), Var("r")).red()) == "r"
-    assert str(App(Abs("x", Var("y")), Var("r")).red()) == "y"
-    assert str(App(Abs("x", App(Var("t"), Var("s"))), Var("r")).red()) == "(t s)"
-    assert str(App(Abs("x", App(Var("x"), Var("x"))), Var("r")).red()) == "(r r)"
-    assert str(App(Abs("x", Abs("x", Var("t"))), Var("r")).red()) == "(Lx.t)"
+    assert str(reduce(App(Abs("x", Var("M")), Var("x")))) == "M"
+    assert str(reduce(App(Abs("x", Var("M")), Var("z")))) == "M"
+    assert str(reduce(App(Abs("x", Var("x")), Var("r")))) == "r"
+    assert str(reduce(App(Abs("x", Var("y")), Var("r")))) == "y"
+    assert str(reduce(App(Abs("x", App(Var("t"), Var("s"))), Var("r")))) == "(t s)"
+    assert str(reduce(App(Abs("x", App(Var("x"), Var("x"))), Var("r")))) == "(r r)"
+    assert str(reduce(App(Abs("x", Abs("x", Var("t"))), Var("r")))) == "(Lx.t)"
     body = Abs("x", App(Var("x"), Var("y")))
     abst = Abs("y", body)
-    assert str(App(abst, Var("x")).red()) == "(L@0.(@0 x))" # renaming example (alpha-conversion)
+    assert str(reduce(App(abst, Var("x")))) == "(L@0.(@0 x))" # renaming example (alpha-conversion)
     resetFresh()
 
     # Application of applications
-    assert str(App(App(Var("M"), Var("N")), Var("x")).red()) == "((M N) x)"
-    assert str(App(App(Var("M"), Var("N")), Abs("x", Var("x"))).red()) == "((M N) (Lx.x))"
-    assert str(App(App(Var("M"), Var("N")), App(Var("A"), Var("B"))).red()) =="((M N) (A B))"
+    assert str(reduce(App(App(Var("M"), Var("N")), Var("x")))) == "((M N) x)"
+    assert str(reduce(App(App(Var("M"), Var("N")), Abs("x", Var("x"))))) == "((M N) (Lx.x))"
+    assert str(reduce(App(App(Var("M"), Var("N")), App(Var("A"), Var("B"))), memoize=False)) =="((M N) (A B))"
 
     print("Unit tests for reductions passed!")
 
@@ -76,39 +78,48 @@ def testInfiniteLoop():
     print("Running infinite loop tests...")
     infloop = parse("((Lx.(x x)) (Lx.(x x)))")
     try:
-        infloop.red()
+        reduce(infloop)
         assert False
     except RecursionError:
         pass
     try:
-        infloop.red()
+        reduce(infloop)
         assert False
     except RecursionError:
         pass
     print("Infinite loop tests passed!")
 
+def testCanonicalForm():
+    print("Running canonical form tests...")
+    f = parse("a b (Lx.Lx.x y) (Lz.Lx.z x)")
+    print(canon(f))
+    f = parse("v n (Lp.Lp.p z) (Li.Lj.i j)")
+    print(canon(f))
+
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
 (options, args) = parser.parse_args()
 if options.filename:
-    print()
     print("Running test file `%s`..." % options.filename)
     with open(options.filename) as f:
         rawInput = f.read()
+        start = time.time()
         print("Raw input: %s" % rawInput[0:-1])
         parsedExpr = parse(rawInput)
         if parsedExpr is not None:
             print("Parsed expression: %s" % parsedExpr)
-            redExpr = parsedExpr.red()
+            redExpr = reduce(parsedExpr, True)
             print("Reduced expression: %s" % decode(redExpr))
         else:
             print("Parsed empty expression")
-    print("Done")
+        end = time.time()
+    print("Done in %ss" % int(end - start))
 else:
     print()
     print("Running unit tests...")
     testReductions()
     testChurchEncoding()
     testInfiniteLoop()
+    testCanonicalForm()
     print("Done")
 

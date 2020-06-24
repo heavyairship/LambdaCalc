@@ -18,15 +18,15 @@
 ##########################################################################
 # Abstract base class for a Lambda Calculus Expression
 class LambdaExpr(object):
-    def red_bn(self):
+    def red_bn(self, memoize):
         # Reduction by name
         # See: https://www.itu.dk/~sestoft/papers/sestoft-lamreduce.pdf
         pass
-    def red_no(self):
+    def red_no(self, memoize):
         # Reduction by normal order
         # See: https://www.itu.dk/~sestoft/papers/sestoft-lamreduce.pdf
         pass
-    def red(self):
+    def red(self, memoize):
         # Default reduction
         pass
     def app(self, argument):
@@ -34,6 +34,8 @@ class LambdaExpr(object):
     def sub(self, var, expr):
         pass
     def free(self):
+        pass
+    def canon(self):
         pass
     def __str__(self):
         pass
@@ -43,12 +45,12 @@ class LambdaExpr(object):
 class Var(LambdaExpr):
     def __init__(self, var):
         self.var = var
-    def red_bn(self):
+    def red_bn(self, memoize):
         return self
-    def red_no(self):
+    def red_no(self, memoize):
         return self
-    def red(self):
-        return self.red_no()
+    def red(self, memoize):
+        return self.red_no(memoize)
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -59,6 +61,8 @@ class Var(LambdaExpr):
         return self if self.var != var else expr
     def free(self):
         return set([self.var])
+    def canon(self):
+        return self if self.var[0] == canonPre else Var(fresh(canonPre))
     def __str__(self):
         return self.var
 
@@ -68,12 +72,19 @@ class Abs(LambdaExpr):
     def __init__(self, param, body):
         self.param = param
         self.body = body
-    def red_bn(self):
+    def red_bn(self, memoize):
         return self
-    def red_no(self):
-        return Abs(self.param, self.body.red_no())
-    def red(self):
-        return self.red_no()
+    def red_no(self, memoize):
+        if memoize:
+            can = str(canon(self))
+            if can in redMap:
+                return can[redMap]
+        out = Abs(self.param, self.body.red_no(memoize))
+        if memoize:
+            redMap[can] = out
+        return out
+    def red(self, memoize):
+        return self.red_no(memoize)
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -92,6 +103,9 @@ class Abs(LambdaExpr):
         return Abs(self.param, self.body.sub(var, expr)) 
     def free(self):
         return self.body.free() - set([self.param])
+    def canon(self):
+        f = fresh(canonPre)
+        return Abs(f, self.body.sub(self.param, Var(f)).canon())
     def __str__(self):
         return "(L%s.%s)" % (self.param, str(self.body))
 
@@ -101,18 +115,34 @@ class App(LambdaExpr):
     def __init__(self, first, second):
         self.first = first
         self.second = second
-    def red_bn(self):
-        first = self.first.red_bn()
+    def red_bn(self, memoize):
+        if memoize:
+            can = str(canon(self))
+            if can in redMap:
+                return redMap[can]
+        first = self.first.red_bn(memoize)
         if isinstance(first, Abs):
-            return first.app(self.second).red_bn()
-        return App(first, self.second)
-    def red_no(self):
-        first = self.first.red_bn()
+            out = first.app(self.second).red_bn(memoize)
+        else:
+            out = App(first, self.second)
+        if memoize:
+            redMap[can] = out
+        return out
+    def red_no(self, memoize):
+        if memoize:
+            can = str(canon(self))
+            if can in redMap:
+                return redMap[can]
+        first = self.first.red_bn(memoize)
         if isinstance(first, Abs):
-            return first.app(self.second).red_no()
-        return App(first.red_no(), self.second.red_no())
-    def red(self):
-        return self.red_no()
+            out = first.app(self.second).red_no(memoize)
+        else:
+            out = App(first.red_no(memoize), self.second.red_no(memoize))
+        if memoize:
+            redMap[can] = out
+        return out
+    def red(self, memoize):
+        return self.red_no(memoize)
     def app(self, argument):
         if not isinstance(argument, LambdaExpr):
             raise TypeError
@@ -123,18 +153,44 @@ class App(LambdaExpr):
         return App(self.first.sub(var, expr), self.second.sub(var, expr))
     def free(self):
         return self.first.free().union(self.second.free())
+    def canon(self):
+        return App(self.first.canon(), self.second.canon())
     def __str__(self):
         return "(%s %s)" % (str(self.first), str(self.second))
 
+# Used to memoize reductions for better time efficiency
+redMap = {}
+
 counter = -1
-def fresh():
+canonPre = "#"
+def fresh(pre="@"):
     global counter
     counter += 1
-    return "@%d" % counter
+    return "%s%d" % (pre, counter)
 
 def resetFresh():
     global counter
     counter = -1
+
+def canon(expr):
+    if not isinstance(expr, LambdaExpr):
+        raise TypeError
+    resetFresh()
+    can = expr.canon()
+    resetFresh()
+    return can
+
+def reduce(expr, memoize=False):
+    global redMap
+    if not isinstance(expr, LambdaExpr):
+        raise TypeError
+    resetFresh()
+    redMap = {}
+    out = expr.red(memoize)
+    resetFresh()
+    redMap = {}
+    return out
+
 
 ##########################################################################
 # Parsing

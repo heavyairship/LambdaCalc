@@ -20,7 +20,7 @@ if options.filename:
         expr = parse(f.read())
         if expr is None:
             sys.exit()
-        print(decode(expr.red()))
+        print(decode(reduce(expr, True)))
     sys.exit()
 
 ##########################################################################
@@ -41,7 +41,7 @@ class LambdaCalcRepl(cmd.Cmd):
             expr = parse(line)
             if expr is None:
                 return line
-            print(decode(expr.red()))
+            print(decode(reduce(expr, True)))
         except Exception as e:
             print("parse error: %s" % e)
         return line

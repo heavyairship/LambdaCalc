@@ -7,3 +7,6 @@ install:
 
 check: clean install
 	cd test && ./test && ./test --file test.l && ./test --file test-let.l && ./test --file test-while.l
+
+quick-check: clean install
+	cd test && ./test
