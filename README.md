@@ -2,7 +2,7 @@
 
 ## Overview 
  
-This project provides a Python library and interpreter for parsing and reducing Lambda Calculus expressions.
+This project provides a Python library and interpreter for parsing and reducing Lambda Calculus expressions. The reduction strategy used is [Normal Order Reduction to Normal Form](https://www.itu.dk/~sestoft/papers/sestoft-lamreduce.pdf).
 
 ## Prerequisities
 
@@ -105,8 +105,9 @@ done in the Lambda Calculus:
 
 ### Stdlib
 
-The standard library contains let-bindings for useful things, like logical constants and connectives, 
-arithmetic functions, pairs, lists, etc. Note that this is a work in progress. Here are some examples.
+The standard library contains let-bindings for useful things, like arithmetic functions, logical constants and connectives, 
+control flow structures (while, if), pairs, lists, etc. Note that this is a work in progress. 
+Here are some examples.
 
 #### Arithmetic
 ```
@@ -132,10 +133,18 @@ False
 True
 > -> false true
 True
+```
+
+#### Control flow
+```
 > if true 1 2
 1
 > if false 1 2
 2
+> let cond = Ls.pair s (neq s 0);
+> let body = Ls.-- s;
+> (while cond body) 2
+0
 ```
 
 #### Pairs
