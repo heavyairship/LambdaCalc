@@ -1,4 +1,4 @@
-# Lambda Calculus in Python
+# LambdaCalc: Lambda Calculus in Python
 
 ## Overview 
  
