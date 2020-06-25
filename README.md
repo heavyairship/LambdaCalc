@@ -27,7 +27,7 @@ Here's an example of importing the module, parsing an expression from a string, 
 $ python
 >>> from lambdacalc.LambdaCalc import *
 >>> expr = parse("((Lx.x) y)")
->>> reduced = expr.red()
+>>> reduced = reduce(expr)
 >>> str(reduced)
 'y'
 ```
@@ -36,7 +36,7 @@ You can also build an expression directly:
 
 ```
 >>> expr = App(Abs("x", Var("x")), Var("y"))
->>> reduced = expr.red()
+>>> reduced = reduce(expr)
 >>> str(reduced)
 'y'
 ```
