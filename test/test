@@ -91,10 +91,10 @@ def testInfiniteLoop():
 
 def testCanonicalForm():
     print("Running canonical form tests...")
-    f = parse("a b (Lx.Lx.x y) (Lz.Lx.z x)")
-    print(canon(f))
-    f = parse("v n (Lp.Lp.p z) (Li.Lj.i j)")
-    print(canon(f))
+    expr1 = parse("a b (Lx.Lx.x y) (Lz.Lx.z x)")
+    assert str(canon(expr1)) == "(((#0 #1) (L#2.(L#3.(#3 #4)))) (L#5.(L#6.(#5 #6))))"
+    expr2 = parse("v n (Lp.Lp.p z) (Li.Lj.i j)")
+    assert str(canon(expr2)) == "(((#0 #1) (L#2.(L#3.(#3 #4)))) (L#5.(L#6.(#5 #6))))"
 
 parser = OptionParser()
 parser.add_option("-f", "--file", dest="filename", help="path to lambda calc file", type=str)
