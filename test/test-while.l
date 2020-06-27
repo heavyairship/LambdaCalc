@@ -1,3 +1,3 @@
-let cond = Ls.pair s (<> s 0);
+let cond = Ls.pair s (!(is0 s));
 let body = Ls.-- s;
-(while cond body) 3
+(while cond body) 10

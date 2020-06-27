@@ -16,8 +16,8 @@ let * = mul;
 let pow = Lm.Ln.n m;
 let ^ = pow;
 
-let iszero = Ln.n (Lx.false) true;
-let gte = Lm.Ln.iszero (- n m);
+let is0 = Ln.n (Lx.false) true;
+let gte = Lm.Ln.is0 (- n m);
 let eq = Lm.Ln.&& (gte m n) (gte n m);
 let neq = Lm.Ln.! (eq m n);
 let <> = neq;
