@@ -52,8 +52,8 @@ y
 
 To run the interpreter on a file:
 ```
-$ lambdapy --file test.l
-((M N) y)
+$ lambdapy --file <(echo "(Lx.x) y")
+y
 ```
 
 For more info run:
