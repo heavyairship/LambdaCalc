@@ -117,10 +117,14 @@ Here are some examples.
 8
 > + 2 3
 5
+> - 7 4
+3
 > * 4 3
 12
 > ^ 2 3
 8
+> fact 4
+24
 ```
 
 #### Logic
@@ -128,6 +132,8 @@ Here are some examples.
 > true
 True
 > false
+False
+> ! true
 False
 > && true false
 False
