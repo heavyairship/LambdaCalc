@@ -105,14 +105,16 @@ done in the Lambda Calculus:
 
 ### Stdlib
 
-The standard library contains let-bindings for useful things, like arithmetic functions, logical constants and connectives, 
-control flow structures (while, if), pairs, lists, etc. Note that this is a work in progress. 
+The standard library contains let-bindings for useful things, like arithmetic functions, logical constants and connectives, pairs 
+control flow structures (while, if), lists, etc. Note that this is a work in progress. 
 Here are some examples.
 
 #### Arithmetic
 ```
 > ++ 1
 2
+> -- 9
+8
 > + 2 3
 5
 > * 4 3
@@ -135,6 +137,15 @@ True
 True
 ```
 
+#### Pairs
+```
+> let p = pair a b;
+> first p
+a
+> second p
+b
+````
+
 #### Control flow
 ```
 > if true 1 2
@@ -146,15 +157,6 @@ True
 > (while cond body) 2
 0
 ```
-
-#### Pairs
-```
-> let p = pair a b;
-> first p
-a
-> second p
-b
-````
 
 #### Lists
 ```
