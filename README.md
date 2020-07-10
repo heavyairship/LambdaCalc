@@ -105,8 +105,8 @@ done in the Lambda Calculus:
 
 ### Stdlib
 
-The standard library contains let-bindings for useful things, like arithmetic functions, logical constants and connectives, pairs 
-control flow structures (while, if), lists, etc. Note that this is a work in progress. 
+The standard library contains let-bindings for useful things, like arithmetic functions, logical constants and connectives, 
+pairs, control flow structures (while, if), lists, etc. Note that this is a work in progress. 
 Here are some examples.
 
 #### Arithmetic
