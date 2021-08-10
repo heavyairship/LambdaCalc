@@ -52,8 +52,8 @@ y
 
 To run the interpreter on a file:
 ```
-$ lambdapy --file test.l
-((M N) y)
+$ lambdapy --file <(echo "(Lx.x) y")
+y
 ```
 
 For more info run:
@@ -106,19 +106,25 @@ done in the Lambda Calculus:
 ### Stdlib
 
 The standard library contains let-bindings for useful things, like arithmetic functions, logical constants and connectives, 
-control flow structures (while, if), pairs, lists, etc. Note that this is a work in progress. 
+pairs, control flow structures (while, if), lists, etc. Note that this is a work in progress. 
 Here are some examples.
 
 #### Arithmetic
 ```
 > ++ 1
 2
+> -- 9
+8
 > + 2 3
 5
+> - 7 4
+3
 > * 4 3
 12
 > ^ 2 3
 8
+> fact 4
+24
 ```
 
 #### Logic
@@ -127,6 +133,8 @@ Here are some examples.
 True
 > false
 False
+> ! true
+False
 > && true false
 False
 > || false true
@@ -134,6 +142,15 @@ True
 > -> false true
 True
 ```
+
+#### Pairs
+```
+> let p = pair a b;
+> first p
+a
+> second p
+b
+````
 
 #### Control flow
 ```
@@ -146,15 +163,6 @@ True
 > (while cond body) 2
 0
 ```
-
-#### Pairs
-```
-> let p = pair a b;
-> first p
-a
-> second p
-b
-````
 
 #### Lists
 ```
