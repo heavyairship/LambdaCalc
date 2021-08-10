@@ -10,3 +10,6 @@ check: clean install
 
 quick-check: clean install
 	cd test && ./test
+
+update:
+	git add . && git commit -m "update" && git push

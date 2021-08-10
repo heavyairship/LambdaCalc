@@ -199,7 +199,7 @@ def whitespace(c):
     return c in ['\t', '\r', '\n', ' ']
 
 def separator(c):
-    return c in ['let', '=', ';', '(', ')', '.', 'L']
+    return c in ['=', ';', '(', ')', '.', 'L']
 
 def tokenize(data):
     tokens = []
@@ -248,6 +248,8 @@ def numeric(iden):
 
 def validIden(iden):
     if numeric(iden):
+        return False
+    if iden == 'let':
         return False
     for c in iden:
         if c == 'L':
